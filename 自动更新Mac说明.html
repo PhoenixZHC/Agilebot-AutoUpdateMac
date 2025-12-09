@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动更新Mac说明</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 5px;
+            margin-top: 30px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 20px;
+        }
+
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "Consolas", "Courier New", monospace;
+        }
+
+        ul,
+        ol {
+            margin-left: 20px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>自动更新Mac说明</h1>
+
+    <h2>一、工具简介</h2>
+    <p>本工具用于配置本地网络IP地址并更新控制柜的MAC地址。工具支持中文界面，操作简单，一键运行。</p>
+    <p><strong>系统要求</strong>：Windows 10/11，需要管理员权限。</p>
+
+    <h2>二、使用步骤</h2>
+    <h3>步骤1：启动工具</h3>
+    <p>双击 <strong>更新Mac地址.bat</strong> 文件，如出现UAC提示，点击"是"允许运行。</p>
+
+    <h3>步骤2：选择网络适配器</h3>
+    <p>根据提示输入数字选择网络适配器（建议选择有线网络适配器）。</p>
+
+    <h3>步骤3：输入控制柜IP地址</h3>
+    <p>输入控制柜的IP地址，例如：<code>192.168.110.2</code>，按Enter确认。</p>
+
+    <h3>步骤4：配置本地网络</h3>
+    <p>工具会自动计算并配置本地IP地址（与控制柜IP在同一子网）。</p>
+
+    <h3>步骤5：更新控制柜MAC地址</h3>
+    <ul>
+        <li>输入SSH密码：<code>root</code>（密码输入时不会显示，这是正常的安全特性）</li>
+        <li>如果密码错误，可重试，最多5次</li>
+        <li>成功后，会显示完整的 <code>hwaddress ether</code> 行，例如：<code>hwaddress ether 00:01:02:04:A8:17</code></li>
+    </ul>
+    <div class="error">
+        <p><strong>注意</strong>：如果控制柜连接不上，会显示红色错误提示并终止操作。请检查：</p>
+        <ol>
+            <li>控制柜已开机</li>
+            <li>网线已连接</li>
+            <li>IP地址正确</li>
+            <li>本地IP在同一子网</li>
+        </ol>
+    </div>
+
+    <h2>三、常见问题</h2>
+    <h3>1. 窗口显示乱码或叠字</h3>
+    <p><strong>解决方法</strong>：</p>
+    <ol>
+        <li><strong>不要调整窗口大小</strong>（窗口已锁定）</li>
+        <li><strong>修改电脑系统设置</strong>（推荐方法）：
+            <ul>
+                <li>按下Win + I打开设置，进入"时间和语言→语言和区域"，点击"管理语言设置"</li>
+                <li>在弹出的"区域"窗口切换到"管理"选项卡，点击"更改系统区域设置"</li>
+                <li>勾选"Beta版：使用Unicode UTF-8提供全球语言支持"</li>
+                <li>重启电脑后，PowerShell及系统全局中文显示都会正常</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>2. 提示"需要管理员权限"</h3>
+    <p>右键点击 <strong>更新Mac地址.bat</strong>，选择"以管理员身份运行"。</p>
+
+    <h3>3. 控制柜连接不上</h3>
+    <p>检查：控制柜已开机、网线已连接、IP地址正确、本地IP在同一子网。</p>
+
+    <h3>4. 密码输入错误</h3>
+    <p>确认密码为：<code>root</code>，可以重试，最多5次。</p>
+
+    <h2>四、注意事项</h2>
+    <ul>
+        <li><strong>管理员权限</strong>：工具需要管理员权限才能修改网络配置</li>
+        <li><strong>网络中断</strong>：配置IP地址时，网络可能会短暂中断</li>
+        <li><strong>密码安全</strong>：SSH密码输入时不会显示，这是正常的安全特性</li>
+        <li><strong>窗口大小</strong>：不要尝试调整窗口大小，已锁定防止显示问题</li>
+    </ul>
+
+    <hr>
+    <p><strong>版本</strong>: 1.0<br>
+        <strong>更新日期</strong>: 2025年12月5日<br>
+        <strong>作者</strong>: Spoil
+    </p>
+</body>
+
+</html>
