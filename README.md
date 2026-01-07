@@ -255,7 +255,7 @@ pyinstaller --onefile --windowed --name "Auto update Mac address" network_config
 
 ## 更新日志
 
-### V1.0.0 (2025-01-XX)
+### V1.0.0 
 - 初始版本发布
 - 实现网络适配器自动获取和可视化选择
 - 实现控制柜信息配置（IP地址、SSH密码）
