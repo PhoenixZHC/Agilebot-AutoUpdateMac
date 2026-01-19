@@ -39,6 +39,9 @@ class NetworkConfigGUI:
         self.root.resizable(True, True)  # 允许窗口调整大小
         self.root.minsize(1000, 600)  # 设置最小窗口大小
 
+        # 设置现代化背景色
+        self.root.configure(bg="#F5F7FA")
+
         # 设置窗口图标（如果有的话）
         try:
             self.root.iconbitmap(default='')
@@ -46,132 +49,149 @@ class NetworkConfigGUI:
             pass
 
         # 变量
-        self.adapters = []
-        self.selected_adapter_index = -1
-        self.selected_adapter_name = ""
         self.control_ip = tk.StringVar()
         self.control_password = tk.StringVar(value="root")  # 默认密码
         self.status_text = None
-        self.adapter_frames = []  # 存储适配器Frame的引用
 
         # 创建界面
         self.create_widgets()
 
-        # 加载网络适配器
-        self.load_adapters()
-
     def create_widgets(self):
+        # 配置现代化样式
+        style = ttk.Style()
+        style.theme_use('clam')
+
+        # 配置现代化颜色方案
+        style.configure('TFrame', background='#F5F7FA')
+        style.configure('TLabelframe', background='#FFFFFF', borderwidth=1, relief=tk.FLAT)
+        style.configure('TLabelframe.Label', background='#FFFFFF', foreground='#2C3E50',
+                       font=('Microsoft YaHei UI', 11, 'bold'))
+        style.configure('TLabel', background='#FFFFFF', foreground='#34495E',
+                       font=('Microsoft YaHei UI', 10))
+        style.configure('TEntry', fieldbackground='#FFFFFF', borderwidth=1,
+                       relief=tk.SOLID, padding=8, font=('Microsoft YaHei UI', 10))
+        style.map('TEntry',
+                 focuscolor=[('focus', '#4A90E2')],
+                 bordercolor=[('focus', '#4A90E2')])
+
         # 主框架 - 使用左右布局
-        main_frame = ttk.Frame(self.root, padding="10")
+        main_frame = tk.Frame(self.root, bg="#F5F7FA", padx=20, pady=20)
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 左侧内容框架
-        left_frame = ttk.Frame(main_frame)
-        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 10))
+        left_frame = tk.Frame(main_frame, bg="#F5F7FA")
+        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 15))
 
         # 右侧状态框架
-        right_frame = ttk.Frame(main_frame)
+        right_frame = tk.Frame(main_frame, bg="#F5F7FA")
         right_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # 顶部Header区域
-        header_frame = ttk.Frame(left_frame)
-        header_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 15))
+        header_frame = tk.Frame(left_frame, bg="#F5F7FA")
+        header_frame.grid(row=0, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 20))
 
-        # 标题
-        title_label = ttk.Label(
+        # 标题 - 更现代化的大标题
+        title_label = tk.Label(
             header_frame,
             text="Auto update Mac address",
-            font=("Microsoft YaHei UI", 16, "bold")
+            font=("Microsoft YaHei UI", 24, "bold"),
+            bg="#F5F7FA",
+            fg="#2C3E50"
         )
-        title_label.pack(anchor=tk.W)
+        title_label.pack(anchor=tk.W, pady=(0, 5))
 
-        # 步骤1：选择网络适配器（点选形式，参考Windows网络连接界面）
-        step1_frame = ttk.LabelFrame(left_frame, text="步骤 1: 选择网络适配器", padding="10")
-        step1_frame.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
-
-        # 配置步骤框架样式
-        style = ttk.Style()
-        try:
-            style.configure("Step.TLabelframe", borderwidth=2, relief=tk.SOLID)
-            style.configure("Step.TLabelframe.Label", font=("Microsoft YaHei UI", 10, "bold"))
-        except:
-            pass
-
-        # 标题栏
-        header_frame = ttk.Frame(step1_frame)
-        header_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 10))
-
-        ttk.Label(header_frame, text="网络适配器:", font=("Microsoft YaHei UI", 9, "bold")).pack(side=tk.LEFT)
-        refresh_btn = ttk.Button(header_frame, text="刷新列表", command=self.load_adapters)
-        refresh_btn.pack(side=tk.RIGHT, padx=(10, 0))
-
-        # 创建可滚动的适配器列表容器
-        adapter_container = ttk.Frame(step1_frame)
-        adapter_container.grid(row=1, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
-
-        # 创建Canvas和Scrollbar用于滚动（移除固定高度，让其自适应）
-        canvas = tk.Canvas(adapter_container, highlightthickness=0)
-        scrollbar = ttk.Scrollbar(adapter_container, orient="vertical", command=canvas.yview)
-        self.adapter_list_frame = ttk.Frame(canvas)
-
-        # 配置滚动
-        self.adapter_list_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        # 副标题
+        subtitle_label = tk.Label(
+            header_frame,
+            text="自动更新Mac地址",
+            font=("Microsoft YaHei UI", 11),
+            bg="#F5F7FA",
+            fg="#7F8C8D"
         )
+        subtitle_label.pack(anchor=tk.W, pady=(0, 20))
 
-        canvas.create_window((0, 0), window=self.adapter_list_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
+        # 现代化提示信息区域（放在最前面）- 参照图片样式
+        tip_container = tk.Frame(left_frame, bg="#FFF4E6", relief=tk.FLAT, bd=0)
+        tip_container.grid(row=1, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=(0, 20), padx=0)
 
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
+        # 左侧图标区域 - 深橙色条带
+        icon_frame = tk.Frame(tip_container, bg="#FF9800", width=50)
+        icon_frame.pack(side=tk.LEFT, fill=tk.Y, padx=0, pady=0)
+        icon_label = tk.Label(
+            icon_frame,
+            text="⚠",
+            font=("Microsoft YaHei UI", 24),
+            bg="#FF9800",
+            fg="white"
+        )
+        icon_label.pack(expand=True, pady=15)
 
-        # 绑定鼠标滚轮
-        def _on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        # 提示文本区域
+        tip_text_frame = tk.Frame(tip_container, bg="#FFF4E6")
+        tip_text_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(20, 20), pady=(18, 18))
 
-        self.adapter_canvas = canvas
-        self.adapter_list_frame_ref = self.adapter_list_frame
+        tip_title = tk.Label(
+            tip_text_frame,
+            text="重要提示",
+            font=("Microsoft YaHei UI", 12, "bold"),
+            bg="#FFF4E6",
+            fg="#2C3E50",
+            anchor=tk.W
+        )
+        tip_title.pack(anchor=tk.W, pady=(0, 8))
 
-        # 配置权重
-        step1_frame.columnconfigure(0, weight=1)
-        step1_frame.rowconfigure(1, weight=1)
-        adapter_container.columnconfigure(0, weight=1)
-        adapter_container.rowconfigure(0, weight=1)
+        tip_content = tk.Label(
+            tip_text_frame,
+            text="请确保本地IP和控制柜IP在同一网段!",
+            font=("Microsoft YaHei UI", 11),
+            bg="#FFF4E6",
+            fg="#2C3E50",
+            anchor=tk.W
+        )
+        tip_content.pack(anchor=tk.W)
 
-        # 步骤2：输入控制柜IP和密码
-        step2_frame = ttk.LabelFrame(left_frame, text="步骤 2: 输入控制柜信息", padding="10")
-        step2_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
+        # 步骤1：输入控制柜IP和密码 - 现代化卡片设计
+        step1_frame = ttk.LabelFrame(left_frame, text="步骤1: 输入控制柜信息", padding="20")
+        step1_frame.grid(row=2, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
 
-        ttk.Label(step2_frame, text="控制柜IP地址:").grid(row=0, column=0, sticky=tk.W, pady=5)
-        ip_entry = ttk.Entry(step2_frame, textvariable=self.control_ip)
-        ip_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=5, pady=5)
+        # 标签样式
+        label_style = {'font': ('Microsoft YaHei UI', 10, 'bold'), 'bg': '#FFFFFF', 'fg': '#34495E'}
 
-        ttk.Label(step2_frame, text="控制柜密码:").grid(row=1, column=0, sticky=tk.W, pady=5)
-        password_entry = ttk.Entry(step2_frame, textvariable=self.control_password, show="*")
-        password_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=5, pady=5)
+        ip_label = tk.Label(step1_frame, text="控制柜IP地址:", **label_style)
+        ip_label.grid(row=0, column=0, sticky=tk.W, pady=(0, 8), padx=(0, 10))
+        ip_entry = ttk.Entry(step1_frame, textvariable=self.control_ip, font=("Microsoft YaHei UI", 11), width=30)
+        ip_entry.grid(row=0, column=1, sticky=(tk.W, tk.E), padx=(0, 0), pady=(0, 15))
 
-        # 步骤3：显示计算出的配置
-        step3_frame = ttk.LabelFrame(left_frame, text="步骤 3: 网络配置信息", padding="10")
-        step3_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
+        password_label = tk.Label(step1_frame, text="控制柜密码:", **label_style)
+        password_label.grid(row=1, column=0, sticky=tk.W, pady=(0, 8), padx=(0, 10))
+        password_entry = ttk.Entry(step1_frame, textvariable=self.control_password, show="*",
+                                  font=("Microsoft YaHei UI", 11), width=30)
+        password_entry.grid(row=1, column=1, sticky=(tk.W, tk.E), padx=(0, 0), pady=(0, 0))
+
+        # 步骤2：显示计算出的配置 - 现代化卡片设计
+        step2_frame = ttk.LabelFrame(left_frame, text="步骤 2: MAC地址信息", padding="20")
+        step2_frame.grid(row=3, column=0, columnspan=2, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 15))
 
         # 配置信息显示区域使用更好的视觉样式
-        info_container = ttk.Frame(step3_frame)
+        info_container = tk.Frame(step2_frame, bg="#FFFFFF")
         info_container.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=5)
 
-        self.local_ip_label = ttk.Label(info_container, text="本地IP地址: 未计算", foreground="gray", font=("Microsoft YaHei UI", 9))
-        self.local_ip_label.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=3)
+        # MAC地址显示 - 参照图片样式
+        mac_label_title = tk.Label(info_container, text="MAC地址:",
+                                    font=("Microsoft YaHei UI", 10, "bold"),
+                                    bg="#FFFFFF", fg="#34495E", anchor=tk.W)
+        mac_label_title.grid(row=0, column=0, sticky=tk.W, pady=(0, 8))
 
-        self.subnet_mask_label = ttk.Label(info_container, text="子网掩码: 未计算", foreground="gray", font=("Microsoft YaHei UI", 9))
-        self.subnet_mask_label.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=3)
-
-        self.mac_address_label = ttk.Label(info_container, text="MAC地址: 未计算", foreground="gray", font=("Microsoft YaHei UI", 9))
-        self.mac_address_label.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=3)
+        self.mac_address_label = tk.Label(info_container, text="未生成",
+                                         font=("Microsoft YaHei UI", 11),
+                                         bg="#FFFFFF", fg="#95A5A6",
+                                         anchor=tk.W, padx=0, pady=0,
+                                         relief=tk.FLAT, bd=0)
+        self.mac_address_label.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 0))
 
         info_container.columnconfigure(0, weight=1)
 
-        # 绑定IP输入事件，自动计算配置
+        # 绑定IP输入事件，自动计算MAC地址
         self.control_ip.trace('w', self.on_ip_changed)
 
         # 执行按钮区域
@@ -182,36 +202,41 @@ class NetworkConfigGUI:
         button_container = ttk.Frame(action_frame)
         button_container.pack(expand=True)
 
+        # 配置现代化按钮样式 - 绿色主题
+        style = ttk.Style()
+        style.configure("Primary.TButton",
+                       font=("Microsoft YaHei UI", 11, "bold"),
+                       padding=(25, 12))
+        style.map("Primary.TButton",
+                 background=[('active', '#27AE60'), ('!active', '#2ECC71')],
+                 foreground=[('active', 'white'), ('!active', 'white')])
+
         self.execute_btn = ttk.Button(
             button_container,
             text="开始配置",
             command=self.execute_configuration,
-            width=15
+            style="Primary.TButton",
+            width=20
         )
-        self.execute_btn.pack(side=tk.LEFT, padx=5)
+        self.execute_btn.pack(side=tk.LEFT, padx=10)
 
-        self.stop_btn = ttk.Button(
-            button_container,
-            text="停止",
-            command=self.stop_execution,
-            state=tk.DISABLED,
-            width=15
-        )
-        self.stop_btn.pack(side=tk.LEFT, padx=5)
-
-        # 状态显示区域（右侧）
-        status_frame = ttk.LabelFrame(right_frame, text="执行状态", padding="10")
+        # 状态显示区域（右侧）- 现代化设计
+        status_frame = ttk.LabelFrame(right_frame, text="执行状态", padding="15")
         status_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         self.status_text = scrolledtext.ScrolledText(
             status_frame,
             wrap=tk.WORD,
-            font=("Consolas", 9),
-            bg="#1E1E1E",  # 深色背景
-            fg="#D4D4D4",  # 浅色文字
-            insertbackground="#FFFFFF",  # 光标颜色
-            selectbackground="#264F78",  # 选中背景
-            selectforeground="#FFFFFF"  # 选中文字颜色
+            font=("Consolas", 10),
+            bg="#2C3E50",  # 现代化深蓝灰色背景
+            fg="#ECF0F1",  # 浅色文字
+            insertbackground="#5BA3F5",  # 蓝色光标
+            selectbackground="#4A90E2",  # 选中背景
+            selectforeground="#FFFFFF",  # 选中文字颜色
+            relief=tk.FLAT,
+            borderwidth=0,
+            padx=10,
+            pady=10
         )
         self.status_text.pack(fill=tk.BOTH, expand=True)
 
@@ -234,17 +259,15 @@ class NetworkConfigGUI:
         main_frame.columnconfigure(1, weight=3)  # 右侧状态区域占更多空间
         main_frame.rowconfigure(0, weight=1)
         left_frame.columnconfigure(0, weight=1)
-        left_frame.rowconfigure(1, weight=3)  # 适配器列表区域可扩展
-        left_frame.rowconfigure(2, weight=1)  # 步骤2可扩展
-        left_frame.rowconfigure(3, weight=1)  # 步骤3可扩展
+        left_frame.rowconfigure(2, weight=1)  # 步骤1可扩展
+        left_frame.rowconfigure(3, weight=1)  # 步骤2可扩展
         right_frame.columnconfigure(0, weight=1)
         right_frame.rowconfigure(0, weight=1)
         status_frame.columnconfigure(0, weight=1)
         status_frame.rowconfigure(0, weight=1)
-        step1_frame.columnconfigure(0, weight=1)
-        step1_frame.rowconfigure(1, weight=1)
-        step2_frame.columnconfigure(1, weight=1)  # 输入框列可扩展
-        step3_frame.columnconfigure(0, weight=1)  # 信息显示列可扩展
+        step1_frame.columnconfigure(1, weight=1)  # 输入框列可扩展
+        step2_frame.columnconfigure(0, weight=1)  # 信息显示列可扩展
+        info_container.columnconfigure(0, weight=1)
 
         # 执行标志
         self.is_running = False
@@ -283,155 +306,6 @@ class NetworkConfigGUI:
             self.status_text.see(tk.END)
             self.root.update()
 
-    def load_adapters(self):
-        """加载网络适配器列表"""
-        try:
-            self.log("正在获取网络适配器列表...", level="INFO")
-
-            # 使用PowerShell获取适配器信息（包括连接名称）
-            # 确保使用UTF-8编码以支持Unicode字符（中文、日文、韩文等）
-            ps_cmd = """
-            [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-            $OutputEncoding = [System.Text.Encoding]::UTF8
-            $adapters = Get-NetAdapter | Select-Object Name, Status, InterfaceDescription
-            $result = @()
-            foreach ($adapter in $adapters) {
-                $connection = Get-NetConnectionProfile -InterfaceAlias $adapter.Name -ErrorAction SilentlyContinue
-                $connectionName = if ($connection) { $connection.Name } else { "" }
-                $result += @{
-                    Name = $adapter.Name
-                    Status = $adapter.Status
-                    InterfaceDescription = $adapter.InterfaceDescription
-                    ConnectionName = $connectionName
-                }
-            }
-            $result | ConvertTo-Json -Depth 10
-            """
-
-            result = subprocess.run(
-                ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
-                 "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $OutputEncoding = [System.Text.Encoding]::UTF8; " + ps_cmd],
-                capture_output=True,
-                text=True,
-                encoding='utf-8',
-                errors='replace'  # 使用replace而不是ignore，确保Unicode字符正确处理
-            )
-
-            if result.returncode == 0:
-                import json
-                try:
-                    # 确保JSON解析时正确处理Unicode
-                    adapters_data = json.loads(result.stdout, strict=False)
-                    if not isinstance(adapters_data, list):
-                        adapters_data = [adapters_data]
-
-                    self.adapters = []
-
-                    for adapter in adapters_data:
-                        # 确保所有字符串字段都正确处理Unicode
-                        name = str(adapter.get('Name', '')).strip()
-                        status = str(adapter.get('Status', '')).strip()
-                        desc = str(adapter.get('InterfaceDescription', '')).strip()
-                        conn_name = str(adapter.get('ConnectionName', '')).strip()
-
-                        if name:
-                            self.adapters.append({
-                                'name': name,
-                                'status': status,
-                                'description': desc,
-                                'connection_name': conn_name
-                            })
-
-                    # 创建适配器列表显示
-                    self._create_adapter_list()
-
-                    self.log(f"找到 {len(self.adapters)} 个网络适配器")
-                except json.JSONDecodeError:
-                    # 如果JSON解析失败，尝试使用netsh
-                    self.load_adapters_netsh()
-            else:
-                # 使用netsh作为备用方案
-                self.load_adapters_netsh()
-
-        except Exception as e:
-            self.log(f"获取适配器列表时出错: {str(e)}", level="ERROR")
-            messagebox.showerror("错误", f"无法获取网络适配器列表: {str(e)}")
-
-    def _create_adapter_list(self):
-        """创建适配器列表显示（点选形式，参考Windows网络连接界面）"""
-        # 清除现有的适配器Frame
-        for frame in self.adapter_frames:
-            frame.destroy()
-        self.adapter_frames = []
-
-        # 创建样式
-        style = ttk.Style()
-        try:
-            style.configure("Selected.TFrame", background="#E3F2FD")
-            style.configure("Selected.TLabel", background="#E3F2FD", foreground="#1976D2")
-        except:
-            pass
-
-        # 为每个适配器创建可点击的Frame
-        for i, adapter in enumerate(self.adapters):
-            name = adapter['name']
-            status = adapter['status']
-            desc = adapter['description']
-            status_text = self._get_status_text(status)
-
-            # 创建适配器Frame（可点击）
-            adapter_frame = ttk.Frame(self.adapter_list_frame_ref, relief=tk.RAISED, borderwidth=1)
-            adapter_frame.grid(row=i, column=0, sticky=(tk.W, tk.E), padx=2, pady=2)
-            adapter_frame.bind("<Button-1>", lambda e, idx=i: self.on_adapter_clicked(idx))
-
-            # 适配器名称（左侧，加粗）
-            # 使用支持Unicode的字体
-            name_label = ttk.Label(
-                adapter_frame,
-                text=name,
-                font=("Microsoft YaHei UI", 9, "bold"),
-                anchor="w"
-            )
-            name_label.grid(row=0, column=0, sticky=tk.W, padx=10, pady=5)
-            name_label.bind("<Button-1>", lambda e, idx=i: self.on_adapter_clicked(idx))
-
-            # 状态（右侧，绿色或灰色）
-            status_color = "#4CAF50" if status_text == "已连接" else "#757575"
-            status_label = ttk.Label(
-                adapter_frame,
-                text=status_text,
-                foreground=status_color,
-                font=("Microsoft YaHei UI", 9),  # 使用支持Unicode的字体
-                anchor="e"
-            )
-            status_label.grid(row=0, column=1, sticky=tk.E, padx=10, pady=5)
-            status_label.bind("<Button-1>", lambda e, idx=i: self.on_adapter_clicked(idx))
-
-            # 描述信息（第二行，完整显示）
-            if desc:
-                desc_label = ttk.Label(
-                    adapter_frame,
-                    text=f"({desc})",
-                    font=("Microsoft YaHei UI", 8),  # 使用支持Unicode的字体
-                    foreground="#666666",
-                    anchor="w"
-                )
-                desc_label.grid(row=1, column=0, columnspan=2, sticky=tk.W, padx=10, pady=(0, 5))
-                desc_label.bind("<Button-1>", lambda e, idx=i: self.on_adapter_clicked(idx))
-
-            # 配置列权重
-            adapter_frame.columnconfigure(0, weight=1)
-            adapter_frame.columnconfigure(1, weight=0)
-
-            self.adapter_frames.append(adapter_frame)
-
-        # 默认选择第一个适配器
-        if len(self.adapters) > 0:
-            self.on_adapter_clicked(0)
-
-        # 更新Canvas滚动区域
-        self.adapter_list_frame_ref.update_idletasks()
-        self.adapter_canvas.configure(scrollregion=self.adapter_canvas.bbox("all"))
 
     def _format_connection_error(self, error_message, control_ip, local_ip):
         """格式化连接错误信息，添加故障排除建议"""
@@ -454,10 +328,9 @@ class NetworkConfigGUI:
             error_text += "2. 网线已连接\n"
             error_text += "3. IP地址正确\n"
             error_text += f"   控制柜IP: {control_ip}\n"
-            error_text += f"   本地IP: {local_ip}\n"
-            error_text += "4. 本地IP在同一子网\n"
+            error_text += "4. 确保本地IP与控制柜IP在同一网段\n"
             error_text += "\n提示：请确保控制柜已启动，网线连接正常，\n"
-            error_text += "并且本地IP地址与控制柜IP在同一子网内。"
+            error_text += "并且本地IP地址与控制柜IP在同一网段内。"
         else:
             error_text += "请检查：\n"
             error_text += "1. 控制柜SSH服务是否正常运行\n"
@@ -487,9 +360,8 @@ class NetworkConfigGUI:
             self.log("2. 网线已连接", level="WARNING")
             self.log("3. IP地址正确", level="WARNING")
             self.log(f"   控制柜IP: {control_ip}", level="INFO")
-            self.log(f"   本地IP: {local_ip}", level="INFO")
-            self.log("4. 本地IP在同一子网", level="WARNING")
-            self.log("提示：请确保控制柜已启动，网线连接正常，并且本地IP地址与控制柜IP在同一子网内。", level="ERROR")
+            self.log("4. 确保本地IP与控制柜IP在同一网段", level="WARNING")
+            self.log("提示：请确保控制柜已启动，网线连接正常，并且本地IP地址与控制柜IP在同一网段内。", level="ERROR")
         else:
             self.log("请检查：", level="ERROR")
             self.log("1. 控制柜SSH服务是否正常运行", level="WARNING")
@@ -541,170 +413,28 @@ class NetworkConfigGUI:
         return result[0]
 
 
-    def _get_status_text(self, status):
-        """将状态转换为中文显示"""
-        status_lower = str(status).lower()
-        if status_lower in ['up', 'connected', '已连接']:
-            return "已连接"
-        elif status_lower in ['down', 'disconnected', '已断开连接']:
-            return "未连接"
-        elif 'cable' in status_lower or '电缆' in status_lower:
-            return "网络电缆被拔出"
-        elif 'enabled' in status_lower or '已启用' in status_lower:
-            return "已启用"
-        else:
-            return str(status)
-
-    def load_adapters_netsh(self):
-        """使用netsh获取适配器列表（备用方案）"""
-        try:
-            # 使用UTF-8编码以支持Unicode字符
-            result = subprocess.run(
-                ["netsh", "interface", "show", "interface"],
-                capture_output=True,
-                text=True,
-                encoding='utf-8',  # 改为UTF-8以支持Unicode
-                errors='replace'  # 使用replace确保Unicode字符正确处理
-            )
-
-            if result.returncode == 0:
-                lines = result.stdout.split('\n')
-                self.adapters = []
-                adapter_names = []
-
-                for line in lines:
-                    line = line.strip()
-                    if not line:
-                        continue
-
-                    # 跳过标题行
-                    if 'State' in line or '状态' in line or line.startswith('---'):
-                        continue
-
-                    # 使用正则表达式匹配，支持中英文
-                    # 格式：状态 类型 管理状态 名称
-                    # 例如：Connected Dedicated Enabled "以太网"
-                    # 或者：已连接 专用 已启用 "WLAN"
-                    match = re.match(r'^(\S+)\s+(\S+)\s+(\S+)\s+(.+)$', line)
-                    if match:
-                        status = match.group(1)
-                        name = match.group(4).strip().strip('"').strip("'")
-
-                        if name:
-                            self.adapters.append({
-                                'name': name,
-                                'status': status,
-                                'description': '',
-                                'connection_name': ''
-                            })
-
-                # 创建适配器列表显示
-                self._create_adapter_list()
-
-                self.log(f"找到 {len(self.adapters)} 个网络适配器")
-        except Exception as e:
-            self.log(f"使用netsh获取适配器时出错: {str(e)}", "red")
-
-    def on_adapter_clicked(self, index):
-        """适配器点击事件"""
-        if 0 <= index < len(self.adapters):
-            # 更新选中状态
-            self.selected_adapter_index = index
-            adapter = self.adapters[index]
-            self.selected_adapter_name = adapter['name']
-
-            # 更新所有适配器Frame的显示状态
-            self._update_adapter_selection()
-
-            # 记录日志
-            self.log(f"已选择适配器: {adapter['name']}")
-
-    def _update_adapter_selection(self):
-        """更新适配器选择状态的显示"""
-        for i, frame in enumerate(self.adapter_frames):
-            if i == self.selected_adapter_index:
-                # 选中状态：蓝色背景
-                frame.configure(style="Selected.TFrame")
-                for widget in frame.winfo_children():
-                    if isinstance(widget, ttk.Label):
-                        widget.configure(style="Selected.TLabel")
-            else:
-                # 未选中状态：默认样式
-                frame.configure(style="TFrame")
-                for widget in frame.winfo_children():
-                    if isinstance(widget, ttk.Label):
-                        widget.configure(style="TLabel")
 
     def on_ip_changed(self, *args):
-        """IP地址改变时自动计算配置"""
+        """IP地址改变时自动计算MAC地址"""
         ip = self.control_ip.get().strip()
         if not ip:
-            self.local_ip_label.config(text="本地IP地址: 未计算", foreground="gray")
-            self.subnet_mask_label.config(text="子网掩码: 未计算", foreground="gray")
-            self.mac_address_label.config(text="MAC地址: 未计算", foreground="gray")
+            self.mac_address_label.config(text="未生成", fg="#95A5A6", bg="#FFFFFF")
             return
 
         try:
             # 验证IP格式
             ipaddress.ip_address(ip)
 
-            # 计算子网掩码
-            subnet_mask = self.calculate_subnet_mask(ip)
-
-            # 计算本地IP（同子网，最后一位随机2-255）
-            local_ip = self.calculate_local_ip(ip)
-
             # 生成MAC地址
             mac_address = self.generate_mac_address()
 
-            # 更新步骤3的配置信息
-            self.local_ip_label.config(text=f"本地IP地址: {local_ip}", foreground="green")
-            self.subnet_mask_label.config(text=f"子网掩码: {subnet_mask}", foreground="green")
-            self.mac_address_label.config(text=f"MAC地址: {mac_address}", foreground="green")
+            # 更新步骤2的MAC地址信息 - 参照图片样式
+            self.mac_address_label.config(text=mac_address, fg="#34495E", bg="#FFFFFF")
         except ValueError:
-            self.local_ip_label.config(text="本地IP地址: IP格式无效", foreground="red")
-            self.subnet_mask_label.config(text="子网掩码: IP格式无效", foreground="red")
-            self.mac_address_label.config(text="MAC地址: IP格式无效", foreground="red")
+            self.mac_address_label.config(text="IP格式无效", fg="#E74C3C", bg="#FFFFFF")
         except Exception as e:
-            self.local_ip_label.config(text=f"本地IP地址: 计算错误", foreground="red")
-            self.subnet_mask_label.config(text=f"子网掩码: 计算错误", foreground="red")
-            self.mac_address_label.config(text=f"MAC地址: 计算错误", foreground="red")
+            self.mac_address_label.config(text="计算错误", fg="#E74C3C", bg="#FFFFFF")
 
-    def calculate_subnet_mask(self, ip):
-        """计算子网掩码"""
-        try:
-            ip_obj = ipaddress.ip_address(ip)
-            first_byte = int(ip_obj.packed[0])
-
-            if first_byte == 10:
-                return "255.0.0.0"
-            elif first_byte == 172 and 16 <= int(ip_obj.packed[1]) <= 31:
-                return "255.255.0.0"
-            elif first_byte == 192 and int(ip_obj.packed[1]) == 168:
-                return "255.255.255.0"
-            else:
-                return "255.255.255.0"
-        except:
-            return "255.255.255.0"
-
-    def calculate_local_ip(self, control_ip):
-        """计算本地IP地址"""
-        try:
-            ip_obj = ipaddress.ip_address(control_ip)
-            ip_bytes = bytearray(ip_obj.packed)
-            control_last_byte = ip_bytes[3]
-
-            # 生成一个不同于控制柜IP最后一位的数字（2-255）
-            # 如果控制柜IP最后一位是2-255，则排除它
-            available_values = [i for i in range(2, 256) if i != control_last_byte]
-            if not available_values:
-                # 如果所有值都被排除（理论上不会发生），使用2
-                available_values = [2]
-
-            ip_bytes[3] = random.choice(available_values)
-            return str(ipaddress.ip_address(bytes(ip_bytes)))
-        except:
-            return None
 
     def generate_mac_address(self):
         """生成随机MAC地址"""
@@ -739,10 +469,6 @@ class NetworkConfigGUI:
     def execute_configuration(self):
         """执行配置"""
         # 验证输入
-        if self.selected_adapter_index < 0 or not self.selected_adapter_name:
-            messagebox.showerror("错误", "请选择网络适配器！")
-            return
-
         if not self.control_ip.get().strip():
             messagebox.showerror("错误", "请输入控制柜IP地址！")
             return
@@ -755,7 +481,6 @@ class NetworkConfigGUI:
 
         # 禁用按钮
         self.execute_btn.config(state=tk.DISABLED)
-        self.stop_btn.config(state=tk.NORMAL)
         self.is_running = True
         self.stop_flag = False
 
@@ -764,64 +489,24 @@ class NetworkConfigGUI:
         thread.daemon = True
         thread.start()
 
-    def stop_execution(self):
-        """停止执行"""
-        self.stop_flag = True
-        self.log("正在停止...")
-
     def _execute_configuration_thread(self):
         """执行配置的线程函数"""
         try:
-            # 获取选中的适配器名称
-            adapter_name = self.selected_adapter_name
-
             control_ip = self.control_ip.get().strip()
-            subnet_mask = self.calculate_subnet_mask(control_ip)
-            local_ip = self.calculate_local_ip(control_ip)
 
             self.log("=" * 50)
-            self.log("开始配置网络...")
+            self.log("开始更新控制柜MAC地址...")
             self.log(f"控制柜IP: {control_ip}")
-            self.log(f"本地IP: {local_ip}")
-            self.log(f"子网掩码: {subnet_mask}")
-            self.log(f"网络适配器: {adapter_name}")
             self.log("=" * 50)
 
-            # 步骤1：配置本地网络
-            self.log("\n步骤 1: 配置本地网络", level="INFO")
-            success, message = self.set_static_ip(adapter_name, local_ip, subnet_mask)
-
-            if not success:
-                self.log(f"配置失败: {message}", level="ERROR")
-                self.root.after(0, lambda: messagebox.showerror("错误", f"网络配置失败:\n{message}"))
-                self._reset_buttons()
-                return
-
-            self.log(f"配置成功: {message}", level="SUCCESS")
-            # 保存配置的值，以便后续更新时使用
-            self._last_configured_local_ip = local_ip
-            self._last_configured_subnet_mask = subnet_mask
-            # 更新步骤3的本地IP和子网掩码显示
-            self._update_step3_display(local_ip=local_ip, subnet_mask=subnet_mask)
-            self.log("等待网络稳定...", level="INFO")
-            time.sleep(3)
-
-            if self.stop_flag:
-                self.log("已停止")
-                self._reset_buttons()
-                return
-
-            # 步骤2：更新控制柜MAC地址
-            self.log("\n步骤 2: 更新控制柜MAC地址", level="INFO")
+            # 步骤1：更新控制柜MAC地址
+            self.log("\n步骤 1: 更新控制柜MAC地址", level="INFO")
             # 获取密码
             password = self.control_password.get().strip() or "root"
-            # 保存local_ip用于错误信息显示
-            self._last_local_ip = local_ip
             mac_success, mac_message = self.update_control_cabinet_mac(control_ip, password=password)
 
-            # 无论成功或失败，都更新步骤3的MAC地址显示（使用计算出的MAC地址）
-            # 更新步骤3的MAC地址显示，同时保留local_ip和subnet_mask
-            self._update_step3_display(local_ip=local_ip, subnet_mask=subnet_mask, mac_address=mac_message)
+            # 更新步骤2的MAC地址显示
+            self._update_step2_display(mac_address=mac_message)
 
             if mac_success:
                 self.log(f"MAC地址更新成功", level="SUCCESS")
@@ -831,10 +516,10 @@ class NetworkConfigGUI:
             else:
                 self.log(f"MAC地址更新失败: {mac_message}", level="ERROR")
                 # 在日志中显示详细错误信息（包含故障排除建议）
-                self._log_error_with_troubleshooting(mac_message, control_ip, self._last_local_ip or local_ip)
+                self._log_error_with_troubleshooting(mac_message, control_ip, "")
 
                 # 生成友好的错误信息，包含故障排除建议
-                error_msg = self._format_connection_error(mac_message, control_ip, self._last_local_ip or local_ip)
+                error_msg = self._format_connection_error(mac_message, control_ip, "")
                 self.root.after(0, lambda msg=error_msg: messagebox.showerror("MAC地址更新失败", msg))
 
         except Exception as e:
@@ -846,101 +531,24 @@ class NetworkConfigGUI:
     def _reset_buttons(self):
         """重置按钮状态"""
         self.root.after(0, lambda: self.execute_btn.config(state=tk.NORMAL))
-        self.root.after(0, lambda: self.stop_btn.config(state=tk.DISABLED))
         self.is_running = False
 
-    def _update_step3_display(self, local_ip=None, subnet_mask=None, mac_address=None):
-        """更新步骤3的显示信息"""
-        # 如果没有传递local_ip，尝试使用保存的值
-        if not local_ip and hasattr(self, '_last_configured_local_ip'):
-            local_ip = self._last_configured_local_ip
-        # 如果没有传递subnet_mask，尝试使用保存的值
-        if not subnet_mask and hasattr(self, '_last_configured_subnet_mask'):
-            subnet_mask = self._last_configured_subnet_mask
-
-        if local_ip:
-            self.root.after(0, lambda ip=local_ip: self.local_ip_label.config(
-                text=f"本地IP地址: {ip}", foreground="green"))
-        if subnet_mask:
-            self.root.after(0, lambda sm=subnet_mask: self.subnet_mask_label.config(
-                text=f"子网掩码: {sm}", foreground="green"))
+    def _update_step2_display(self, mac_address=None):
+        """更新步骤2的显示信息"""
         # 更新MAC地址显示（优先使用保存的生成MAC地址）
         if hasattr(self, '_last_generated_mac') and self._last_generated_mac:
             # 优先使用保存的生成MAC地址（这是实际计算出的MAC地址，与执行状态中显示的一致）
             mac = self._last_generated_mac
             self.root.after(0, lambda m=mac: self.mac_address_label.config(
-                text=f"MAC地址: {m}", foreground="green"))
+                text=m, fg="#34495E", bg="#FFFFFF"))
         elif mac_address:
             # 如果消息中包含MAC地址，尝试从消息中提取（作为备用）
             mac_match = re.search(r'([0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2}:[0-9A-Fa-f]{2})', str(mac_address))
             if mac_match:
                 mac = mac_match.group(1)
                 self.root.after(0, lambda m=mac: self.mac_address_label.config(
-                    text=f"MAC地址: {m}", foreground="green"))
+                    text=m, fg="#34495E", bg="#FFFFFF"))
 
-    def set_static_ip(self, adapter_name, ip_address, subnet_mask, gateway=None):
-        """设置静态IP地址"""
-        try:
-            self.log(f"正在检查并更新IP配置...")
-
-            # 先尝试移除现有配置（如果存在），忽略错误
-            remove_result = subprocess.run(
-                ["netsh", "interface", "ipv4", "delete", "address",
-                 f"name={adapter_name}", f"address={ip_address}"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-
-            time.sleep(0.5)
-
-            # 设置新配置（即使IP已存在，也会更新配置）
-            self.log(f"正在设置IP配置...")
-            if gateway:
-                cmd = ["netsh", "interface", "ipv4", "set", "address",
-                       f"name={adapter_name}", "source=static",
-                       f"address={ip_address}", f"mask={subnet_mask}",
-                       f"gateway={gateway}"]
-            else:
-                cmd = ["netsh", "interface", "ipv4", "set", "address",
-                       f"name={adapter_name}", "source=static",
-                       f"address={ip_address}", f"mask={subnet_mask}"]
-
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                encoding='utf-8',  # 改为UTF-8以支持Unicode
-                errors='replace'  # 使用replace确保Unicode字符正确处理
-            )
-
-            if result.returncode == 0:
-                return True, f"IP配置成功 (IP: {ip_address}, 掩码: {subnet_mask})"
-            else:
-                # 如果设置失败，尝试先删除所有IP配置，然后重新设置
-                error_msg = result.stderr or result.stdout or "未知错误"
-                # 尝试删除所有IP地址配置
-                subprocess.run(
-                    ["netsh", "interface", "ipv4", "delete", "address",
-                     f"name={adapter_name}", "all"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
-                time.sleep(0.5)
-                # 重新尝试设置
-                retry_result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    encoding='utf-8',
-                    errors='replace'
-                )
-                if retry_result.returncode == 0:
-                    return True, f"IP配置成功 (IP: {ip_address}, 掩码: {subnet_mask})"
-                else:
-                    return False, error_msg
-
-        except Exception as e:
-            return False, str(e)
 
     def update_control_cabinet_mac(self, control_ip, username="root", password=None):
         """通过SSH更新控制柜MAC地址"""
